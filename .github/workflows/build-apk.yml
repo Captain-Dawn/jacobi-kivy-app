@@ -27,24 +27,23 @@ jobs:
             build-essential \
             wget
 
-      - name: Install Android SDK command-line tools
+      - name: Install Android command-line tools (correct layout)
         run: |
-          mkdir -p $HOME/android-sdk/cmdline-tools/latest
-          cd $HOME/android-sdk
+          export ANDROID_SDK_ROOT=$HOME/android-sdk
+          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
+          cd $ANDROID_SDK_ROOT
 
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
           unzip -q commandlinetools-linux-9477386_latest.zip
 
-          mv cmdline-tools/bin $HOME/android-sdk/cmdline-tools/latest/
+          mv cmdline-tools latest
+          mkdir -p cmdline-tools
+          mv latest cmdline-tools/latest
 
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
           export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
 
-          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
-            "platform-tools" \
-            "platforms;android-29" \
-            "build-tools;29.0.3"
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-29" "build-tools;29.0.3"
 
       - name: Install Buildozer
         run: |
