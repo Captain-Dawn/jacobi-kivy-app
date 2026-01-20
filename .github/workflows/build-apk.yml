@@ -24,12 +24,18 @@ jobs:
             git zip unzip openjdk-17-jdk \
             python3-pip \
             libffi-dev libssl-dev \
-            build-essential
+            build-essential \
+            android-sdk
 
       - name: Install Buildozer
         run: |
           pip install --upgrade pip
           pip install buildozer cython==0.29.36
+
+      - name: Install Android Build Tools (AIDL fix)
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "build-tools;29.0.3" "platforms;android-29"
 
       - name: Build APK
         run: |
@@ -40,3 +46,4 @@ jobs:
         with:
           name: jacobi-apk
           path: bin/*.apk
+        
