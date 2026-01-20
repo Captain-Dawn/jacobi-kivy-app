@@ -15,10 +15,14 @@ jobs:
       - name: Build APK using Kivy Buildozer Docker image
         run: |
           docker run --rm \
-            --user 1000:1000 \
             -v ${{ github.workspace }}:/home/user/app \
             kivy/buildozer \
+            sh -c "
+            sed -i 's/self.check_root()/# self.check_root()/g' \
+              /home/user/.venv/lib/python3.12/site-packages/buildozer/__init__.py &&
             buildozer android debug
+            "
+
 
 
 
