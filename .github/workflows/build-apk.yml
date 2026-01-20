@@ -25,17 +25,33 @@ jobs:
             python3-pip \
             libffi-dev libssl-dev \
             build-essential \
-            android-sdk
+            wget
+
+      - name: Install Android Command Line Tools
+        run: |
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          cd $HOME/android-sdk
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip commandlinetools-linux-9477386_latest.zip
+          mv cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+
+      - name: Set Android SDK environment
+        run: |
+          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$PATH" >> $GITHUB_ENV
+
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-29" \
+            "build-tools;29.0.3"
 
       - name: Install Buildozer
         run: |
           pip install --upgrade pip
           pip install buildozer cython==0.29.36
-
-      - name: Install Android Build Tools (AIDL fix)
-        run: |
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "build-tools;29.0.3" "platforms;android-29"
 
       - name: Build APK
         run: |
@@ -46,4 +62,3 @@ jobs:
         with:
           name: jacobi-apk
           path: bin/*.apk
-        
