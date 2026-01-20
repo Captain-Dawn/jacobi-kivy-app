@@ -57,11 +57,6 @@ jobs:
           pip install --upgrade pip
           pip install buildozer cython==0.29.36
 
-      - name: Verify AIDL
-        run: |
-          which aidl
-          aidl version
-
       - name: Build APK
         run: |
           buildozer android debug
