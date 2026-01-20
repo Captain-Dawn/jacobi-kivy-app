@@ -8,6 +8,10 @@ jobs:
   build:
     runs-on: ubuntu-22.04
 
+    env:
+      ANDROID_HOME: /home/runner/android-sdk
+      ANDROID_SDK_ROOT: /home/runner/android-sdk
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,28 +31,36 @@ jobs:
             build-essential \
             wget
 
-      - name: Install Android command-line tools (correct layout)
+      - name: Install Android SDK (official layout)
         run: |
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
-          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-          cd $ANDROID_SDK_ROOT
+          mkdir -p $ANDROID_HOME
+          cd $ANDROID_HOME
 
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
           unzip -q commandlinetools-linux-9477386_latest.zip
 
-          mv cmdline-tools latest
-          mkdir -p cmdline-tools
-          mv latest cmdline-tools/latest
+          mkdir -p cmdline-tools/latest
+          mv cmdline-tools/* cmdline-tools/latest/ || true
 
-          export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
 
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-29" "build-tools;29.0.3"
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+            "platform-tools" \
+            "platforms;android-29" \
+            "build-tools;29.0.3"
+
+          echo "PATH=$ANDROID_HOME/build-tools/29.0.3:$PATH" >> $GITHUB_ENV
 
       - name: Install Buildozer
         run: |
           pip install --upgrade pip
           pip install buildozer cython==0.29.36
+
+      - name: Verify AIDL
+        run: |
+          which aidl
+          aidl version
 
       - name: Build APK
         run: |
